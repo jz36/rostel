@@ -7,7 +7,7 @@ import java.util.List;
 public class ParamsFactory {
     public String getSQLquery(HttpServletRequest request){
         StringBuffer sql = new StringBuffer();
-        sql.append("SELECT DISTINCT human.name, human.second_name FROM human LEFT JOIN cars on cars.id_human=human.id WHERE ");
+        sql.append("SELECT DISTINCT human.name, human.second_name FROM human LEFT JOIN cars on cars.id_human=human.id LEFT JOIN city ON city.id=human.city WHERE ");
         boolean first = false;
         List<String> paramName = Collections.list(request.getParameterNames());
         for(String name : paramName){
