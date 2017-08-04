@@ -1,55 +1,51 @@
 package ru.all_mind.servlet.db;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import ru.all_mind.servlet.objects.Human;
+
+import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Properties;
 
 public class DBWorker {
     private Connection dbConnection = null;
-    private String dbUser = "jz36";
-    private String dbPassword = "12345";
-    private String dbCharset = "utf8";
-    private final String DB_CONNECTION = "jdbc:postgresql://localhost:5432/rostel";
-    private static DBWorker dbWorker;
 
-    private DBWorker(){
-        try{
-            Class.forName("org.postgresql.Driver");
-        } catch (ClassNotFoundException e){
-            e.printStackTrace();
-        }
-        Properties properties = new Properties();
-        properties.setProperty("user", dbUser);
-        properties.setProperty("password", dbPassword);
-        properties.setProperty("useUnicode", "true");
-        properties.setProperty("characterEncoding", dbCharset);
-        try{
-            dbConnection = DriverManager.getConnection(DB_CONNECTION, properties);
-        } catch (SQLException e){
-            e.printStackTrace();
-        }
+    public DBWorker() {
+        dbConnection = ConnectionPool.getInstance().getConnection();
     }
 
-    public static DBWorker getInstance(){
-        if(dbWorker == null){
-            dbWorker = new DBWorker();
-        }
-        return dbWorker;
-    }
-
-    public ArrayList<String> getData(String sql){
-        ArrayList<String> result = new ArrayList<String>();
-        String query = sql;
+    public JsonArray getData(HttpServletRequest request, Connection connection){
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        Gson gson = gsonBuilder.create();
+        JsonArray result = new JsonArray();
+        ParamsFactory paramsFactory = new ParamsFactory();
         ResultSet rs = null;
         try {
-            Statement statement = dbConnection.createStatement();
-            rs = statement.executeQuery(query);
+            rs = paramsFactory.getSQLquery(request, connection);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
             while(rs.next()){
-                result.add(rs.getString("name") + " " + rs.getString("second_name") + ';');
+                result.add(gson.toJson(new Human(rs.getString("name"), rs.getString("second_name"))));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return result;
+    }
+
+    public Connection getDbConnection(){
+        return dbConnection;
+    }
+
+    public void closeConnection(){
+        try {
+            dbConnection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

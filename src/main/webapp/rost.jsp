@@ -13,7 +13,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 </head>
 <body>
-<h1>Hello! Hi!</h1>
+<h1>Поиск по базе!</h1>
     <div id="search">
         <input name="name" placeholder="Имя">
         <input name="second_name" placeholder="Фамилия">
@@ -48,12 +48,13 @@
                 dataString,
                 function (answer) {
                     $('#result').append("<div id='resultDiv'>");
-                    answerArray = answer.split(';');
-                    for(i=0; i < answerArray.length; i++){
-                        $('#resultDiv').append("<p>" + answerArray[i] + "</p>");
+                    for(i = 0; i < answer.length; i++){
+                        var user = JSON.parse(answer[i]);
+                        $('#resultDiv').append("<p>" + user.name + " " + user.second_name + "</p>");
                     }
                     $('#result').append("</div>");
-                }
+                },
+                "json"
             )
         }
         else{
